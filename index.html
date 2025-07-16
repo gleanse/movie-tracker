@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Movie Tracker</title>
+  <link rel="stylesheet" href="index.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Movie Tracker</h1>
+
+    <div class="search-section">
+      <div class="search-box">
+        <input type="text" id="searchInput" placeholder="Search for movies...">
+      </div>
+
+      <div class="tabs">
+        <button class="tab active" onclick="showTab('search')">Search Results</button>
+        <button class="tab" onclick="showTab('watched')">Watched Movies</button>
+        <button class="tab" onclick="showTab('watchlist')">Watch List</button>
+        <button class="tab" onclick="showTab('favorites')">Favorites</button>
+      </div>
+    </div>
+
+    <div id="searchResults" class="tab-content">
+      <div class="section-title">Search Results</div>
+      <div id="searchMovies" class="movies-grid"></div>
+    </div>
+
+    <div id="watchedMovies" class="tab-content" style="display: none;">
+      <div class="section-title">Watched Movies</div>
+      <div id="watchedList" class="movies-grid"></div>
+    </div>
+
+    <div id="watchlistMovies" class="tab-content" style="display: none;">
+      <div class="section-title">Watch List</div>
+      <div id="watchlistList" class="movies-grid"></div>
+    </div>
+
+    <div id="favoriteMovies" class="tab-content" style="display: none;">
+      <div class="section-title">Favorite Movies</div>
+      <div id="favoritesList" class="movies-grid"></div>
+    </div>
+  </div>
+
+  <script src="main.js"></script>
+</body>
+</html>
