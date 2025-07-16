@@ -232,6 +232,7 @@ function addToWatchlist(id, title, posterPath, releaseDate, voteAverage) {
       release_date: releaseDate,
       vote_average: voteAverage,
     });
+    saveToLocalStorage();
   }
 
   refreshCurrentView();
@@ -252,6 +253,7 @@ function markAsWatched(id, title, posterPath, releaseDate, voteAverage) {
       release_date: releaseDate,
       vote_average: voteAverage,
     });
+    saveToLocalStorage();
   }
 
   refreshCurrentView();
@@ -268,6 +270,7 @@ function addToFavorites(id, title, posterPath, releaseDate, voteAverage) {
       release_date: releaseDate,
       vote_average: voteAverage,
     });
+    saveToLocalStorage();
   }
 
   refreshCurrentView();
@@ -364,4 +367,17 @@ document.getElementById('searchInput').addEventListener('input', function (e) {
   debouncedSearch();
 });
 
+function loadFromLocalStorage() {
+  watchedMovies = JSON.parse(localStorage.getItem('watchedMovies')) || [];
+  watchlistMovies = JSON.parse(localStorage.getItem('watchlistMovies')) || [];
+  favoriteMovies = JSON.parse(localStorage.getItem('favoriteMovies')) || [];
+}
+
+function saveToLocalStorage() {
+  localStorage.setItem('watchedMovies', JSON.stringify(watchedMovies));
+  localStorage.setItem('watchlistMovies', JSON.stringify(watchlistMovies));
+  localStorage.setItem('favoriteMovies', JSON.stringify(favoriteMovies));
+}
+
+loadFromLocalStorage();
 loadWatchedMovies();
