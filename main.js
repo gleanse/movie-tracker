@@ -18,10 +18,32 @@ function debounce(func, wait) {
     searchTimeout = setTimeout(later, wait);
   };
 }
+
 function loadWatchedMovies() {
   displayWatchedMovies();
   displayWatchlistMovies();
   displayFavoriteMovies();
+  loadPopularMovies();
+}
+
+async function loadPopularMovies() {
+  const searchContainer = document.getElementById('searchMovies');
+  searchContainer.innerHTML =
+    '<div class="loading">Loading popular movies...</div>';
+
+  try {
+    const response = await fetch(
+      `${BASE_URL}/movie/popular?api_key=${API_KEY}`
+    );
+    const data = await response.json();
+
+    displaySearchResults(data.results);
+    document.getElementById('searchSectionTitle').textContent =
+      'Popular Movies';
+  } catch (error) {
+    searchContainer.innerHTML =
+      '<div class="loading">Error loading popular movies</div>';
+  }
 }
 
 function showTab(tab) {
@@ -53,7 +75,7 @@ function showTab(tab) {
 async function searchMovies() {
   const query = document.getElementById('searchInput').value.trim();
   if (!query) {
-    document.getElementById('searchMovies').innerHTML = '';
+    loadPopularMovies();
     return;
   }
 
@@ -69,6 +91,8 @@ async function searchMovies() {
     const data = await response.json();
 
     displaySearchResults(data.results);
+    document.getElementById('searchSectionTitle').textContent =
+      'Search Results';
   } catch (error) {
     searchContainer.innerHTML =
       '<div class="loading">Error searching movies</div>';
@@ -177,24 +201,24 @@ function createMovieCard(movie, context) {
       movie.id
     }, '${movie.title.replace(/'/g, "\\'")}', '${movie.poster_path || ''}', '${
       movie.release_date || ''
-    }', ${movie.vote_average || 0})">Mark as Watched</button>`;
+    }', ${movie.vote_average || 0})">Mark as Finished</button>`;
   } else if (context === 'favorites') {
     buttonHtml = '<button class="watch-btn favorite">Favorite</button>';
   }
 
   return `
-        <div class="movie-card" onclick="showMovieDetails(${movie.id})">
-          ${
-            posterUrl
-              ? `<img src="${posterUrl}" alt="${movie.title}" class="movie-poster">`
-              : `<div class="no-poster">No Poster</div>`
-          }
-          <div class="movie-title">${movie.title}</div>
-          <div class="movie-year">${year}</div>
-          <div class="movie-rating">⭐ ${rating}</div>
-          ${buttonHtml}
-        </div>
-      `;
+            <div class="movie-card" onclick="showMovieDetails(${movie.id})">
+              ${
+                posterUrl
+                  ? `<img src="${posterUrl}" alt="${movie.title}" class="movie-poster">`
+                  : `<div class="no-poster">No Poster</div>`
+              }
+              <div class="movie-title">${movie.title}</div>
+              <div class="movie-year">${year}</div>
+              <div class="movie-rating">⭐ ${rating}</div>
+              ${buttonHtml}
+            </div>
+          `;
 }
 
 function addToWatchlist(id, title, posterPath, releaseDate, voteAverage) {
@@ -218,6 +242,7 @@ function markAsWatched(id, title, posterPath, releaseDate, voteAverage) {
   if (watchlistIndex > -1) {
     watchlistMovies.splice(watchlistIndex, 1);
   }
+
   const watchedIndex = watchedMovies.findIndex((movie) => movie.id === id);
   if (watchedIndex === -1) {
     watchedMovies.push({
@@ -277,41 +302,43 @@ async function showMovieDetails(movieId) {
     const runtime = movie.runtime ? `${movie.runtime} min` : 'N/A';
 
     const modalContent = `
-          <div class="modal" id="movieModal" style="display: block;">
-            <div class="modal-content">
-              <span class="close" onclick="closeModal()">&times;</span>
-              <div style="overflow: hidden;">
-                ${
-                  movie.poster_path
-                    ? `<img src="${IMAGE_BASE_URL}${movie.poster_path}" alt="${movie.title}" class="modal-poster">`
-                    : '<div class="modal-poster" style="background: #e9ecef; display: flex; align-items: center; justify-content: center;">No Poster</div>'
-                }
-                <div class="modal-info">
-                  <div class="modal-title">${movie.title}</div>
-                  <div class="modal-details">
-                    <strong>Year:</strong> ${
-                      movie.release_date
-                        ? new Date(movie.release_date).getFullYear()
-                        : 'N/A'
-                    }<br>
-                    <strong>Runtime:</strong> ${runtime}<br>
-                    <strong>Genre:</strong> ${genres || 'N/A'}<br>
-                    <strong>Director:</strong> ${
-                      director ? director.name : 'N/A'
-                    }<br>
-                    <strong>Rating:</strong> ⭐ ${
-                      movie.vote_average ? movie.vote_average.toFixed(1) : 'N/A'
+              <div class="modal" id="movieModal" style="display: block;">
+                <div class="modal-content">
+                  <span class="close" onclick="closeModal()">&times;</span>
+                  <div style="overflow: hidden;">
+                    ${
+                      movie.poster_path
+                        ? `<img src="${IMAGE_BASE_URL}${movie.poster_path}" alt="${movie.title}" class="modal-poster">`
+                        : '<div class="modal-poster" style="background: #1a1a1a; display: flex; align-items: center; justify-content: center; border: 1px solid #444; color: #666;">No Poster</div>'
                     }
-                  </div>
-                  <div class="modal-plot">
-                    <strong>Plot:</strong><br>
-                    ${movie.overview || 'No plot available.'}
+                    <div class="modal-info">
+                      <div class="modal-title">${movie.title}</div>
+                      <div class="modal-details">
+                        <strong>Year:</strong> ${
+                          movie.release_date
+                            ? new Date(movie.release_date).getFullYear()
+                            : 'N/A'
+                        }<br>
+                        <strong>Runtime:</strong> ${runtime}<br>
+                        <strong>Genre:</strong> ${genres || 'N/A'}<br>
+                        <strong>Director:</strong> ${
+                          director ? director.name : 'N/A'
+                        }<br>
+                        <strong>Rating:</strong> ⭐ ${
+                          movie.vote_average
+                            ? movie.vote_average.toFixed(1)
+                            : 'N/A'
+                        }
+                      </div>
+                      <div class="modal-synopsis">
+                        <strong>Synopsis:</strong><br>
+                        ${movie.overview || 'No synopsis available.'}
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
-        `;
+            `;
 
     document.body.insertAdjacentHTML('beforeend', modalContent);
   } catch (error) {
