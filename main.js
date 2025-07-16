@@ -211,7 +211,7 @@ function createMovieCard(movie, context) {
               ${
                 posterUrl
                   ? `<img src="${posterUrl}" alt="${movie.title}" class="movie-poster">`
-                  : `<div class="no-poster">No Poster</div>`
+                  : `<div class="no-poster">No Poster Available</div>`
               }
               <div class="movie-title">${movie.title}</div>
               <div class="movie-year">${year}</div>
@@ -312,7 +312,7 @@ async function showMovieDetails(movieId) {
                     ${
                       movie.poster_path
                         ? `<img src="${IMAGE_BASE_URL}${movie.poster_path}" alt="${movie.title}" class="modal-poster">`
-                        : '<div class="modal-poster" style="background: #1a1a1a; display: flex; align-items: center; justify-content: center; border: 1px solid #444; color: #666;">No Poster</div>'
+                        : '<div class="modal-poster" style="background: #1a1a1a; display: flex; align-items: center; justify-content: center; border: 1px solid #444; color: #666;">No Poster Available</div>'
                     }
                     <div class="modal-info">
                       <div class="modal-title">${movie.title}</div>
