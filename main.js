@@ -41,8 +41,14 @@ async function loadPopularMovies() {
     document.getElementById('searchSectionTitle').textContent =
       'Popular Movies';
   } catch (error) {
-    searchContainer.innerHTML =
-      '<div class="loading">Error loading popular movies</div>';
+    let errorMessage = 'Unable to load popular movies. ';
+
+    if (!navigator.onLine) {
+      errorMessage += 'Please check your internet connection.';
+    } else {
+      errorMessage += 'Please try again later.';
+    }
+    searchContainer.innerHTML = `<div class="loading">${errorMessage}</div>`;
   }
 }
 
@@ -76,6 +82,7 @@ function showTab(tab) {
 async function searchMovies() {
   const query = document.getElementById('searchInput').value.trim();
   if (!query) {
+    document.getElementById('searchInput').value = '';
     loadPopularMovies();
     return;
   }
@@ -91,22 +98,32 @@ async function searchMovies() {
     );
     const data = await response.json();
 
-    displaySearchResults(data.results);
-    document.getElementById('searchSectionTitle').textContent =
-      'Search Results';
+    displaySearchResults(data.results, query);
+    document.getElementById(
+      'searchSectionTitle'
+    ).textContent = `Search Results for "${query}"`;
   } catch (error) {
-    searchContainer.innerHTML =
-      '<div class="loading">Error searching movies</div>';
+    let errorMessage = 'Unable to search movies. ';
+
+    if (!navigator.onLine) {
+      errorMessage += 'Please check your internet connection.';
+    } else {
+      errorMessage += 'Please try again later.';
+    }
+    searchContainer.innerHTML = `<div class="loading">${errorMessage}</div>`;
   }
 }
 
 const debouncedSearch = debounce(searchMovies, 500);
 
-function displaySearchResults(movies) {
+function displaySearchResults(movies, searchTerm = '') {
   const container = document.getElementById('searchMovies');
 
   if (!movies || movies.length === 0) {
-    container.innerHTML = '<div class="loading">No movies found</div>';
+    const noResultsMessage = searchTerm
+      ? `No movies found for "${searchTerm}"`
+      : 'No movies found';
+    container.innerHTML = `<div class="loading">${noResultsMessage}</div>`;
     return;
   }
 
@@ -502,6 +519,26 @@ async function showMovieDetails(movieId) {
     document.body.insertAdjacentHTML('beforeend', modalContent);
   } catch (error) {
     console.error('Error fetching movie details:', error);
+    let errorMessage = 'Unable to load movie details. ';
+    if (!navigator.onLine) {
+      errorMessage += 'Please check your internet connection.';
+    } else {
+      errorMessage += 'Please try again later.';
+    }
+
+    const errorModal = `
+      <div class="modal" id="movieModal" style="display: block;">
+        <div class="modal-content">
+          <span class="close" onclick="closeModal()">&times;</span>
+          <div style="padding: 20px; text-align: center;">
+            <h3>Error</h3>
+            <p>${errorMessage}</p>
+          </div>
+        </div>
+      </div>
+    `;
+
+    document.body.insertAdjacentHTML('beforeend', errorModal);
   }
 }
 
