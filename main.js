@@ -70,6 +70,7 @@ function showTab(tab) {
     document.getElementById('favoriteMovies').style.display = 'block';
     displayFavoriteMovies();
   }
+  refreshCurrentView();
 }
 
 async function searchMovies() {
@@ -186,24 +187,42 @@ function createMovieCard(movie, context) {
   } else if (context === 'watched') {
     const isFavorite = favoriteMovies.find((m) => m.id === movie.id);
     if (isFavorite) {
-      buttonHtml = '<button class="watch-btn favorite">Favorite</button>';
+      buttonHtml = `
+        <button class="watch-btn favorite">Favorite</button>
+        <button class="remove-btn" onclick="event.stopPropagation(); removeFromWatched(${movie.id})">Remove</button>
+      `;
     } else {
-      buttonHtml = `<button class="watch-btn unwatched" onclick="event.stopPropagation(); addToFavorites(${
-        movie.id
-      }, '${movie.title.replace(/'/g, "\\'")}', '${
+      buttonHtml = `
+        <button class="watch-btn unwatched" onclick="event.stopPropagation(); addToFavorites(${
+          movie.id
+        }, '${movie.title.replace(/'/g, "\\'")}', '${
         movie.poster_path || ''
       }', '${movie.release_date || ''}', ${
         movie.vote_average || 0
-      })">Add to Favorites</button>`;
+      })">Add to Favorites</button>
+        <button class="remove-btn" onclick="event.stopPropagation(); removeFromWatched(${
+          movie.id
+        })">Remove</button>
+      `;
     }
   } else if (context === 'watchlist') {
-    buttonHtml = `<button class="watch-btn watched" onclick="event.stopPropagation(); markAsWatched(${
-      movie.id
-    }, '${movie.title.replace(/'/g, "\\'")}', '${movie.poster_path || ''}', '${
-      movie.release_date || ''
-    }', ${movie.vote_average || 0})">Mark as Finished</button>`;
+    buttonHtml = `
+      <button class="watch-btn watched" onclick="event.stopPropagation(); markAsWatched(${
+        movie.id
+      }, '${movie.title.replace(/'/g, "\\'")}', '${
+      movie.poster_path || ''
+    }', '${movie.release_date || ''}', ${
+      movie.vote_average || 0
+    })">Mark as Finished</button>
+      <button class="remove-btn" onclick="event.stopPropagation(); removeFromWatchlist(${
+        movie.id
+      })">Remove</button>
+    `;
   } else if (context === 'favorites') {
-    buttonHtml = '<button class="watch-btn favorite">Favorite</button>';
+    buttonHtml = `
+      <button class="watch-btn favorite">Favorite</button>
+      <button class="remove-btn" onclick="event.stopPropagation(); removeFromFavorites(${movie.id})">Remove</button>
+    `;
   }
 
   return `
@@ -216,7 +235,9 @@ function createMovieCard(movie, context) {
               <div class="movie-title">${movie.title}</div>
               <div class="movie-year">${year}</div>
               <div class="movie-rating">⭐ ${rating}</div>
+              <div class="button-container">
               ${buttonHtml}
+              </div>
             </div>
           `;
 }
@@ -233,8 +254,9 @@ function addToWatchlist(id, title, posterPath, releaseDate, voteAverage) {
       vote_average: voteAverage,
     });
     saveToLocalStorage();
+    loadWatchedMovies();
   }
-
+  showWatchlistToast();
   refreshCurrentView();
 }
 
@@ -254,8 +276,9 @@ function markAsWatched(id, title, posterPath, releaseDate, voteAverage) {
       vote_average: voteAverage,
     });
     saveToLocalStorage();
+    loadWatchedMovies();
   }
-
+  showFinishedToast();
   refreshCurrentView();
 }
 
@@ -271,9 +294,140 @@ function addToFavorites(id, title, posterPath, releaseDate, voteAverage) {
       vote_average: voteAverage,
     });
     saveToLocalStorage();
+    loadWatchedMovies();
+  }
+  showFavoritesToast();
+  refreshCurrentView();
+}
+
+function removeFromWatched(id) {
+  const index = watchedMovies.findIndex((movie) => movie.id === id);
+  if (index > -1) {
+    watchedMovies.splice(index, 1);
+    saveToLocalStorage();
+    displayWatchedMovies();
+    refreshCurrentView();
+    showRemovedToast();
+    updateAllTabs();
+  }
+}
+
+function removeFromWatchlist(id) {
+  const index = watchlistMovies.findIndex((movie) => movie.id === id);
+  if (index > -1) {
+    watchlistMovies.splice(index, 1);
+    saveToLocalStorage();
+    displayWatchlistMovies();
+    refreshCurrentView();
+    showRemovedToast();
+    updateAllTabs();
+  }
+}
+
+function removeFromFavorites(id) {
+  const index = favoriteMovies.findIndex((movie) => movie.id === id);
+  if (index > -1) {
+    favoriteMovies.splice(index, 1);
+    saveToLocalStorage();
+    displayFavoriteMovies();
+    refreshCurrentView();
+    showRemovedToast();
+    updateAllTabs();
+  }
+}
+
+function createToast(type, title, message, icon) {
+  let toastContainer = document.getElementById('toastContainer');
+  if (!toastContainer) {
+    toastContainer = document.createElement('div');
+    toastContainer.id = 'toastContainer';
+    toastContainer.className = 'toast-container';
+    document.body.appendChild(toastContainer);
   }
 
-  refreshCurrentView();
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+
+  toast.innerHTML = `
+        <div class="toast-icon">${icon || '🔔'}</div>
+        <div class="toast-content">
+            <div class="toast-title">${title}</div>
+            <div class="toast-message">${message}</div>
+        </div>
+        <button class="toast-close" onclick="closeToast(this)">×</button>
+    `;
+
+  toastContainer.appendChild(toast);
+
+  setTimeout(() => {
+    toast.classList.add('show');
+  }, 100);
+
+  setTimeout(() => {
+    removeToast(toast);
+  }, 3000);
+}
+
+function closeToast(button) {
+  const toast = button.closest('.toast');
+  removeToast(toast);
+}
+
+function removeToast(toast) {
+  if (toast && toast.parentNode) {
+    toast.classList.remove('show');
+    setTimeout(() => {
+      if (toast.parentNode) {
+        toast.parentNode.removeChild(toast);
+      }
+    }, 300);
+  }
+}
+
+const toastTypes = {
+  favorites: {
+    icon: '❤️',
+    title: 'Added to Favorites',
+    message: 'Item has been added to your favorites list',
+  },
+  watchlist: {
+    icon: '📺',
+    title: 'Added to Watchlist',
+    message: 'Item has been added to your watchlist',
+  },
+  finished: {
+    icon: '✅',
+    title: 'Marked as Finished',
+    message: 'Item has been marked as completed',
+  },
+  removed: {
+    icon: '🗑️',
+    title: 'Item Removed',
+    message: 'Item has been removed from your collection',
+  },
+};
+
+function showToast(type) {
+  const toastData = toastTypes[type];
+  if (!toastData) return;
+
+  createToast(type, toastData.title, toastData.message, toastData.icon);
+}
+
+function showFavoritesToast() {
+  showToast('favorites');
+}
+
+function showWatchlistToast() {
+  showToast('watchlist');
+}
+
+function showFinishedToast() {
+  showToast('finished');
+}
+
+function showRemovedToast() {
+  showToast('removed');
 }
 
 function refreshCurrentView() {
@@ -281,6 +435,8 @@ function refreshCurrentView() {
     const searchInput = document.getElementById('searchInput');
     if (searchInput.value.trim()) {
       searchMovies();
+    } else {
+      loadPopularMovies();
     }
   } else if (currentTab === 'watched') {
     displayWatchedMovies();
@@ -377,7 +533,35 @@ function saveToLocalStorage() {
   localStorage.setItem('watchedMovies', JSON.stringify(watchedMovies));
   localStorage.setItem('watchlistMovies', JSON.stringify(watchlistMovies));
   localStorage.setItem('favoriteMovies', JSON.stringify(favoriteMovies));
+
+  updateAllTabs();
 }
+
+function updateAllTabs() {
+  displayWatchedMovies();
+  displayWatchlistMovies();
+  displayFavoriteMovies();
+
+  if (currentTab === 'search') {
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput && searchInput.value.trim()) {
+      searchMovies();
+    } else {
+      loadPopularMovies();
+    }
+  }
+}
+
+window.addEventListener('storage', function (e) {
+  if (
+    e.key === 'watchedMovies' ||
+    e.key === 'watchlistMovies' ||
+    e.key === 'favoriteMovies'
+  ) {
+    loadFromLocalStorage();
+    updateAllTabs();
+  }
+});
 
 loadFromLocalStorage();
 loadWatchedMovies();
