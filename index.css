@@ -8,10 +8,10 @@ body {
   font-family: Arial, sans-serif;
   background: #1a1a1a;
   color: #e0e0e0;
-  padding: 20px;
 }
 
 .container {
+  padding: 20px;
   max-width: 1200px;
   margin: 0 auto;
 }
@@ -19,7 +19,97 @@ body {
 h1 {
   text-align: center;
   margin-bottom: 30px;
-  color: #ffffff;
+  font-size: 3rem;
+  font-weight: 800;
+  color: #60a5fa;
+  text-shadow: 0 0 5px #3b82f6, 0 0 10px #3b82f6, 0 0 15px #3b82f6,
+    0 0 20px #1e40af, 0 0 35px #1e40af, 0 0 40px #1e40af;
+  animation: blueFlicker 2s infinite alternate;
+  letter-spacing: 3px;
+  position: relative;
+  width: 100%;
+  padding: 0 20px;
+  box-sizing: border-box;
+}
+
+h1::after {
+  content: '';
+  position: absolute;
+  bottom: -15px;
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    #1e40af 10%,
+    #3b82f6 30%,
+    #60a5fa 50%,
+    #3b82f6 70%,
+    #1e40af 90%,
+    transparent 100%
+  );
+  animation: underlineGlow 2s infinite alternate;
+  box-shadow: 0 0 10px #3b82f6, 0 0 20px #3b82f6, 0 0 30px #1e40af;
+}
+
+h1::before {
+  content: '';
+  position: absolute;
+  bottom: -12px;
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    #60a5fa 15%,
+    #93c5fd 50%,
+    #60a5fa 85%,
+    transparent 100%
+  );
+  animation: secondaryGlow 2s infinite alternate;
+}
+
+@keyframes blueFlicker {
+  0%,
+  100% {
+    opacity: 1;
+    text-shadow: 0 0 5px #3b82f6, 0 0 10px #3b82f6, 0 0 15px #3b82f6,
+      0 0 20px #1e40af, 0 0 35px #1e40af, 0 0 40px #1e40af;
+  }
+  50% {
+    opacity: 0.8;
+    text-shadow: 0 0 3px #3b82f6, 0 0 8px #3b82f6, 0 0 12px #3b82f6,
+      0 0 16px #1e40af, 0 0 30px #1e40af, 0 0 35px #1e40af;
+  }
+}
+
+@keyframes underlineGlow {
+  0%,
+  100% {
+    box-shadow: 0 0 10px #3b82f6, 0 0 20px #3b82f6, 0 0 30px #1e40af;
+    opacity: 1;
+  }
+  50% {
+    box-shadow: 0 0 15px #3b82f6, 0 0 30px #3b82f6, 0 0 45px #1e40af,
+      0 0 60px #1e40af;
+    opacity: 0.8;
+  }
+}
+
+@keyframes secondaryGlow {
+  0%,
+  100% {
+    opacity: 0.6;
+    box-shadow: 0 0 5px #60a5fa;
+  }
+  50% {
+    opacity: 1;
+    box-shadow: 0 0 10px #60a5fa;
+  }
 }
 
 .search-section {
@@ -34,17 +124,25 @@ h1 {
 
 input[type='text'] {
   flex: 1;
-  padding: 12px;
-  border: 1px solid #444;
-  border-radius: 4px;
+  padding: 16px 20px;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
   font-size: 16px;
-  background: #2d2d2d;
-  color: #e0e0e0;
+  background: rgba(255, 255, 255, 0.05);
+  color: #ffffff;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+  outline: none;
 }
 
 input[type='text']:focus {
-  outline: none;
-  border-color: #007bff;
+  border-color: #3b82f6;
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+input[type='text']::placeholder {
+  color: rgba(255, 255, 255, 0.5);
 }
 
 button {
@@ -61,36 +159,60 @@ button:hover {
   background: #0056b3;
 }
 
-.tabs {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-}
-
 .tab {
-  padding: 10px 20px;
-  background: #333;
-  color: #e0e0e0;
-  border: none;
-  border-radius: 4px;
+  padding: 12px 24px;
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
   cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  position: relative;
+  overflow: hidden;
   white-space: nowrap;
   flex-shrink: 0;
 }
 
-.tab.active {
-  background: #007bff;
-  color: white;
+.tab::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
+  transition: left 0.5s;
+}
+
+.tab:hover::before {
+  left: 100%;
 }
 
 .tab:hover {
-  background: #555;
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  transform: translateY(-2px);
+}
+
+.tab.active {
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  border-color: #3b82f6;
+  color: #ffffff;
+  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
 }
 
 .tab.active:hover {
-  background: #0056b3;
+  background: linear-gradient(135deg, #2563eb, #1e40af);
+  transform: translateY(-2px);
 }
 
 .movies-grid {
@@ -117,24 +239,6 @@ button:hover {
   box-shadow: 0 20px 40px rgba(0, 123, 255, 0.3),
     0 8px 16px rgba(0, 123, 255, 0.2), 0 0 0 1px rgba(0, 123, 255, 0.1);
   border-color: rgba(0, 123, 255, 0.5);
-}
-
-.movie-card.watched:hover {
-  box-shadow: 0 20px 40px rgba(40, 167, 69, 0.3),
-    0 8px 16px rgba(40, 167, 69, 0.2), 0 0 0 1px rgba(40, 167, 69, 0.1);
-  border-color: rgba(40, 167, 69, 0.5);
-}
-
-.movie-card.watchlist:hover {
-  box-shadow: 0 20px 40px rgba(255, 193, 7, 0.3),
-    0 8px 16px rgba(255, 193, 7, 0.2), 0 0 0 1px rgba(255, 193, 7, 0.1);
-  border-color: rgba(255, 193, 7, 0.5);
-}
-
-.movie-card.favorite:hover {
-  box-shadow: 0 20px 40px rgba(248, 83, 100, 0.3),
-    0 8px 16px rgba(248, 83, 100, 0.2), 0 0 0 1px rgba(248, 83, 100, 0.1);
-  border-color: rgba(248, 83, 100, 0.5);
 }
 
 .movie-card::before {
@@ -237,6 +341,10 @@ button:hover {
 
 .modal-content {
   background-color: #2d2d2d;
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 20px 40px rgba(0, 123, 255, 0.3),
+    0 8px 16px rgba(0, 123, 255, 0.2), 0 0 0 1px rgba(0, 123, 255, 0.1);
+  border-color: rgba(0, 123, 255, 0.5);
   margin: 5% auto;
   padding: 20px;
   border-radius: 8px;
@@ -328,7 +436,7 @@ button:hover {
 
 /* MOBILE RESPONSIVE CSS */
 @media (max-width: 768px) {
-  body {
+  .container {
     padding: 10px;
   }
 
@@ -347,8 +455,9 @@ button:hover {
   }
 
   input[type='text'] {
-    padding: 10px;
-    font-size: 14px;
+    padding: 14px 18px;
+    font-size: 16px;
+    border-radius: 14px;
   }
 
   button {
@@ -363,8 +472,10 @@ button:hover {
   }
 
   .tab {
-    padding: 8px 15px;
-    font-size: 14px;
+    margin-bottom: 5px;
+    padding: 10px 18px;
+    font-size: 13px;
+    border-radius: 10px;
   }
 
   .movies-grid {
@@ -453,6 +564,16 @@ button:hover {
 }
 
 @media (max-width: 480px) {
+  input[type='text'] {
+    padding: 12px 16px;
+    font-size: 15px;
+  }
+
+  .tab {
+    padding: 8px 16px;
+    font-size: 12px;
+  }
+
   .movies-grid {
     grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
     gap: 10px;
@@ -830,4 +951,13 @@ button:hover {
     height: 20px;
     font-size: 16px;
   }
+}
+
+.tabs {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
 }
